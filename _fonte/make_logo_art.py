@@ -79,7 +79,11 @@ for i, c in enumerate(letters):
     keep = dist_lab == c["id"]
     sub[..., 3] = np.where(keep, sub[..., 3], 0)
     x0, x1 = max(0, c["x0"] - 1), min(W, c["x1"] + 2)
-    pieces.append(("ch", x0, WORD_TOP, x1 - x0, H - WORD_TOP, data_uri(sub[:, x0:x1])))
+    crop = sub[:, x0:x1]
+    vis = crop[..., 3] > 128
+    px = crop[..., :3][vis].astype(int)
+    chroma = float((px.max(axis=1) - px.min(axis=1)).mean()) if len(px) else 255
+    pieces.append(("ink" if chroma < 60 else "ch", x0, WORD_TOP, x1 - x0, H - WORD_TOP, data_uri(crop)))
 
 out = ['<span class="logo-art" role="img" aria-label="Laranjoo">']
 li = 0
@@ -88,7 +92,8 @@ for kind, x, y, pw, ph, uri in pieces:
     if kind == "bag":
         out.append('<img class="logo-bag" src="%s" alt="" style="%s">' % (uri, style))
     else:
-        out.append('<img class="logo-ch" src="%s" alt="" style="%s;--i:%d">' % (uri, style, li))
+        cls = "logo-ch ink" if kind == "ink" else "logo-ch glow"
+        out.append('<img class="%s" src="%s" alt="" style="%s;--i:%d">' % (cls, uri, style, li))
         li += 1
 out.append("</span>")
 open(os.path.join(ROOT, "brand", "logo-art.html"), "w", encoding="utf-8").write("".join(out))

@@ -55,7 +55,7 @@ svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-widt
 .b2 { width: 150px; height: 150px; left: -60px; bottom: -70px; background: rgba(255, 255, 255, 0.12); }
 .b3 { width: 46px; height: 46px; right: 18%; bottom: 14px; background: rgba(255, 255, 255, 0.2); }
 .ring { position: absolute; left: 50%; top: 50%; width: max(170%, 900px); aspect-ratio: 1; translate: -50% -50%; background: conic-gradient(from 0deg, #F4381F, #F65F1D 18%, #FFB27A 30%, #F8811C 42%, #F4381F 58%, #F65F1D 74%, #FFC59A 86%, #F4381F); pointer-events: none; }
-.logo-card { position: relative; z-index: 1; isolation: isolate; overflow: hidden; background: #FFFFFF; border-radius: 18px; padding: 18px 16px 16px; text-align: center; transition: transform 0.25s ease-out; box-shadow: 0 10px 30px -18px rgba(120, 30, 0, 0.7); }
+.logo-card { --night: 0; position: relative; z-index: 1; isolation: isolate; overflow: hidden; background: color-mix(in srgb, #15110F calc(var(--night) * 100%), #FFFFFF); border-radius: 18px; padding: 18px 16px 16px; text-align: center; transition: transform 0.25s ease-out; box-shadow: 0 10px 30px -18px rgba(120, 30, 0, 0.7); }
 .logo-card::after { content: ""; position: absolute; inset: -40%; z-index: 2; background: linear-gradient(120deg, transparent 42%, rgba(255, 128, 40, 0.13) 50%, transparent 58%); transform: translate(-60%, -60%); pointer-events: none; }
 .corner { position: absolute; top: 0; left: 0; width: 0; height: 0; z-index: 0; pointer-events: none; }
 .rip { position: absolute; left: -60px; top: -60px; width: 120px; height: 120px; border-radius: 50%; border: 2px solid rgba(246, 95, 29, 0.35); opacity: 0.5; }
@@ -65,6 +65,17 @@ svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-widt
 .s2 { left: 14px; top: 38px; width: 9px; height: 9px; fill: #F8811C; }
 .s3 { left: 52px; top: 36px; width: 8px; height: 8px; fill: #F4381F; }
 .logo-card > h1, .logo-card > .bio { position: relative; z-index: 1; }
+/* ---------- Dia e noite (computador): o mouse à direita anoitece o quadro ---------- */
+.night { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: var(--night); }
+.dusk { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: var(--dusk, 0); background: linear-gradient(200deg, rgba(255, 140, 80, 0.55) 0%, rgba(240, 100, 120, 0.35) 45%, rgba(110, 60, 150, 0.3) 100%); }
+.night-sky { position: absolute; inset: 0; background: radial-gradient(120% 130% at 90% 0%, #3B2A57 0%, #221830 42%, #15110F 78%); }
+.moon { position: absolute; top: 18px; right: 30px; width: 36px; height: 36px; border-radius: 50%; box-shadow: 10px -7px 0 0 #FFE2B8; transform: translateY(calc((1 - var(--night)) * 28px)) rotate(-12deg); filter: drop-shadow(0 0 12px rgba(255, 214, 165, 0.55)); }
+.st { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #FFF6EC; box-shadow: 0 0 6px rgba(255, 240, 220, 0.9); }
+.st.big { width: 4px; height: 4px; }
+.corner { opacity: calc(1 - var(--night)); transform: translateY(calc(var(--night) * 26px)); }
+.logo-card .logo-ch.ink { filter: invert(var(--night)); }
+.logo-card .logo-ch.glow, .logo-card .logo-bag { filter: drop-shadow(0 0 calc(var(--night) * 9px) rgba(255, 138, 50, calc(var(--night) * 0.9))); }
+.logo-card .bio { color: color-mix(in srgb, #F1E3D8 calc(var(--night) * 100%), #6B5B50); }
 /* Ao rolar: o quadro se dissolve, de baixo para cima, na cor do fundo da página */
 .hero { --p: 0; }
 .melt { position: absolute; inset: -1px; z-index: 3; border-radius: inherit; pointer-events: none; opacity: min(1, calc(var(--p) * 2.2)); background: linear-gradient(to top, var(--bg) calc(var(--p) * 85%), color-mix(in srgb, var(--bg) 70%, transparent) calc(var(--p) * 85% + 22%), transparent calc(var(--p) * 85% + 55%)); }
@@ -261,6 +272,8 @@ input:focus-visible, select:focus-visible, .chip:focus-visible, .btn:focus-visib
   .spark { animation: twinkle 2.2s ease-in-out infinite; }
   .s2 { animation-delay: 0.7s; }
   .s3 { animation-delay: 1.4s; }
+  .st { animation: twinkle 2.6s ease-in-out infinite; animation-delay: calc(var(--d) * 0.37s); }
+  .moon { transition: none; }
   .b1 { animation: float 7s ease-in-out infinite; }
   .b2 { animation: float 9s ease-in-out infinite reverse; }
   .b3 { animation: float 5s ease-in-out infinite; }
@@ -301,6 +314,7 @@ input:focus-visible, select:focus-visible, .chip:focus-visible, .btn:focus-visib
     <span class="ring" aria-hidden="true"></span>
     <span class="bubble b1"></span><span class="bubble b2"></span><span class="bubble b3"></span>
     <div class="logo-card" id="logoCard">
+      <div class="dusk" aria-hidden="true"></div><div class="night" aria-hidden="true"><span class="night-sky"></span><span class="st big" style="left:58%;top:22%;--d:0"></span><span class="st" style="left:66%;top:58%;--d:1"></span><span class="st" style="left:72%;top:14%;--d:2"></span><span class="st big" style="left:80%;top:40%;--d:3"></span><span class="st" style="left:87%;top:66%;--d:4"></span><span class="st" style="left:93%;top:28%;--d:5"></span><span class="st" style="left:62%;top:80%;--d:6"></span><span class="st big" style="left:76%;top:84%;--d:7"></span><span class="st" style="left:90%;top:50%;--d:8"></span><span class="st" style="left:70%;top:34%;--d:9"></span><span class="st" style="left:84%;top:10%;--d:10"></span><span class="st big" style="left:96%;top:78%;--d:11"></span><span class="st" style="left:54%;top:48%;--d:12"></span><span class="st" style="left:16%;top:72%;--d:13"></span><span class="st" style="left:28%;top:86%;--d:14"></span><span class="moon"></span></div>
       <div class="corner" aria-hidden="true">
         <span class="rip"></span><span class="rip"></span><span class="rip"></span>
         <span class="blob"></span>
@@ -445,15 +459,30 @@ function onScroll() {
 }
 window.addEventListener("scroll", function () { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
 window.addEventListener("resize", onScroll);
-/* Inclinação leve do quadro acompanhando o mouse (só no computador) */
+/* Inclinação do quadro e dia/noite acompanhando o mouse (só no computador) */
 var logoCard = document.getElementById("logoCard");
-if (!reduce && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+var night = 0, nightTarget = 0, nightRaf = 0;
+function stepNight() {
+  night += (nightTarget - night) * 0.1;
+  if (Math.abs(nightTarget - night) < 0.003) night = nightTarget;
+  logoCard.style.setProperty("--night", night.toFixed(3));
+  logoCard.style.setProperty("--dusk", (1 - Math.abs(2 * night - 1)).toFixed(3));
+  nightRaf = night === nightTarget ? 0 : requestAnimationFrame(stepNight);
+}
+function setNight(t) {
+  nightTarget = t;
+  if (reduce) { night = t; logoCard.style.setProperty("--night", String(t)); logoCard.style.setProperty("--dusk", "0"); return; }
+  if (!nightRaf) nightRaf = requestAnimationFrame(stepNight);
+}
+if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
   hero.addEventListener("pointermove", function (e) {
     var r = logoCard.getBoundingClientRect();
-    var x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
-    logoCard.style.transform = "perspective(900px) rotateX(" + (-y * 6) + "deg) rotateY(" + (x * 6) + "deg)";
+    var x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    if (!reduce) logoCard.style.transform = "perspective(900px) rotateX(" + (-(y - 0.5) * 6) + "deg) rotateY(" + ((x - 0.5) * 6) + "deg)";
+    var t = Math.min(1, Math.max(0, (x - 0.55) / 0.3));
+    setNight(t * t * (3 - 2 * t));
   });
-  hero.addEventListener("pointerleave", function () { logoCard.style.transform = ""; });
+  hero.addEventListener("pointerleave", function () { logoCard.style.transform = ""; setNight(0); });
 }
 mini.addEventListener("click", function (e) {
   e.preventDefault();
