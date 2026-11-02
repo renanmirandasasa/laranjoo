@@ -91,6 +91,15 @@ h1.logo { margin: 0; line-height: 0; }
 .intro-burst { position: absolute; width: min(420px, 90vw); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgba(246, 95, 29, 0.28), rgba(246, 95, 29, 0) 65%); transition: opacity 0.4s ease; }
 .intro.leaving .intro-burst { opacity: 0; }
 .intro-art { position: relative; width: min(280px, 66vw); transform-origin: 0 0; will-change: transform; }
+.intro.js { animation: none; }
+.intro:focus-visible { outline: none; }
+.intro:focus-visible .intro-cta { outline: 2px solid #D2430A; outline-offset: 4px; }
+.intro-stack { position: relative; display: flex; flex-direction: column; align-items: center; gap: 26px; }
+.intro-cta { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 999px; background: #D2430A; color: #FFFFFF; font-family: var(--font-body); font-weight: 700; font-size: 0.98rem; box-shadow: 0 10px 22px -10px rgba(210, 67, 10, 0.7); transition: opacity 0.3s ease, transform 0.3s ease; }
+.intro-cta svg.i { width: 18px; height: 18px; }
+.intro.play .intro-cta { opacity: 0; transform: translateY(8px) scale(0.96); pointer-events: none; }
+.intro:not(.play) .logo-ch { opacity: 0; }
+.intro:not(.play) .intro-burst { opacity: 0; }
 .intro .logo-art { width: 100%; animation: none; }
 .intro-skip { position: absolute; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); left: 0; right: 0; text-align: center; font-size: 0.8rem; color: #9A8577; transition: opacity 0.3s ease; }
 .intro.leaving .intro-skip { opacity: 0; }
@@ -257,6 +266,9 @@ input:focus-visible, select:focus-visible, .chip:focus-visible, .btn:focus-visib
 @keyframes bagIn { 0% { opacity: 0; transform: translateY(-38%) scale(0.55) rotate(-14deg); } 60% { opacity: 1; transform: translateY(4%) scale(1.04) rotate(3deg); } 100% { opacity: 1; transform: none; } }
 @keyframes burst { from { transform: scale(0.2); opacity: 0.55; } to { transform: scale(1.7); opacity: 0; } }
 @keyframes introFailsafe { to { opacity: 0; visibility: hidden; } }
+@keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+@keyframes hop { 0% { transform: none; } 35% { transform: translateY(-9%) scale(1.06) rotate(-4deg); } 70% { transform: translateY(2%) scale(0.98) rotate(2deg); } 100% { transform: none; } }
+@keyframes ctaPulse { 0%, 100% { box-shadow: 0 10px 22px -10px rgba(210, 67, 10, 0.7), 0 0 0 0 rgba(210, 67, 10, 0.35); } 60% { box-shadow: 0 10px 22px -10px rgba(210, 67, 10, 0.7), 0 0 0 12px rgba(210, 67, 10, 0); } }
 @keyframes bagSwing { 0%, 100% { transform: rotate(0); } 18% { transform: rotate(4deg); } 38% { transform: rotate(-3deg); } 56% { transform: rotate(1.6deg); } 72% { transform: rotate(-0.6deg); } 86% { transform: rotate(0); } }
 @keyframes wave { 0%, 62%, 100% { transform: none; } 18% { transform: translateY(-10%) scale(1.16); } 36% { transform: translateY(3%) scale(0.94); } 50% { transform: translateY(-1%) scale(1.02); } }
 @keyframes newPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(244, 96, 30, 0.55); } 60% { box-shadow: 0 0 0 7px rgba(244, 96, 30, 0); } }
@@ -279,9 +291,11 @@ input:focus-visible, select:focus-visible, .chip:focus-visible, .btn:focus-visib
   .b3 { animation: float 5s ease-in-out infinite; }
   .logo-art { animation: drop 0.8s var(--spring) both; }
   .intro .logo-art { animation: none; }
-  .intro .logo-bag { animation: bagIn 0.8s var(--spring) 0.1s both; }
-  .intro .logo-ch { animation: chIn 0.6s var(--spring) both; animation-delay: calc(0.55s + var(--i) * 0.08s); }
-  .intro-burst { animation: burst 1.6s ease-out 0.3s both; }
+  .intro .logo-bag { animation: bagIn 0.8s var(--spring) 0.1s both, breathe 2.4s ease-in-out 0.9s infinite; }
+  .intro-cta { animation: ctaPulse 2s ease-in-out 1s infinite; }
+  .intro.play .logo-bag { animation: hop 0.55s var(--spring) both; }
+  .intro.play .logo-ch { animation: chIn 0.55s var(--spring) both; animation-delay: calc(0.3s + var(--i) * 0.09s); }
+  .intro.play .intro-burst { animation: burst 1.6s ease-out 0.2s both; }
   .logo-bag { animation: bagSwing 3.6s ease-in-out 1s infinite; }
   .logo-ch { animation: wave 2.8s ease-in-out infinite; animation-delay: calc(1.1s + var(--i) * 0.11s); }
   .tag svg.i { animation: flicker 1.6s ease-in-out infinite; }
@@ -302,11 +316,13 @@ input:focus-visible, select:focus-visible, .chip:focus-visible, .btn:focus-visib
 }
 </style>
 
-<div class="intro" id="intro" aria-hidden="true">
+<div class="intro" id="intro" role="button" tabindex="0" aria-label="Entrar no site da Laranjoo">
   <div class="intro-bg"></div>
   <div class="intro-burst"></div>
-  <div class="intro-art" id="introArt">__LOGOART__</div>
-  <div class="intro-skip">Toque para entrar</div>
+  <div class="intro-stack">
+    <div class="intro-art" id="introArt">__LOGOART__</div>
+    <span class="intro-cta"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>Toque para entrar</span>
+  </div>
 </div>
 
 <div class="wrap">
@@ -674,23 +690,80 @@ document.getElementById("chips").addEventListener("click", function (e) {
 document.getElementById("q").addEventListener("input", function (e) { state.q = e.target.value; renderGrid(); });
 document.getElementById("sort").addEventListener("change", function (e) { state.sort = e.target.value; renderGrid(); });
 
-/* ---- Vinheta de abertura: logo sozinha no centro, depois voa para o quadro do topo ---- */
+/* ---- Vinheta de abertura: toque para entrar, logo com sons suaves, depois voa para o quadro ---- */
 (function () {
   var intro = document.getElementById("intro");
   if (!intro) return;
+  intro.classList.add("js");
   var introArt = document.getElementById("introArt");
   var heroArt = document.querySelector("#logoMove .logo-art");
-  var root = document.documentElement, done = false, flown = false;
+  var root = document.documentElement, done = false, flown = false, playing = false, flyTimer = 0;
+  var ac = null, master = null;
   function finish() {
     if (done) return; done = true;
     root.classList.remove("intro-on");
     if (intro.parentNode) intro.parentNode.removeChild(intro);
     onScroll();
+    setTimeout(function () { try { if (ac) ac.close(); } catch (_) {} }, 2600);
   }
   if (reduce || window.scrollY > 40 || !heroArt) { finish(); return; }
   root.classList.add("intro-on");
+  try { intro.focus({ preventScroll: true }); } catch (_) {}
+
+  /* Sons criados na hora pelo navegador (nada é baixado), sempre baixinhos */
+  function startAudio() {
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      ac = new AC();
+      if (ac.state === "suspended") ac.resume();
+      var comp = ac.createDynamicsCompressor();
+      master = ac.createGain(); master.gain.value = 0.55;
+      master.connect(comp); comp.connect(ac.destination);
+    } catch (_) { ac = null; }
+  }
+  function tone(freq, at, dur, vol, type, freqEnd) {
+    if (!ac) return;
+    var t = ac.currentTime + at, o = ac.createOscillator(), g = ac.createGain();
+    o.type = type || "sine";
+    o.frequency.setValueAtTime(freq, t);
+    if (freqEnd) o.frequency.exponentialRampToValueAtTime(freqEnd, t + dur * 0.6);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + 0.05);
+  }
+  function pluck(freq, at) { tone(freq, at, 0.38, 0.07, "sine"); tone(freq * 2, at, 0.16, 0.016, "triangle"); }
+  function whoosh(at, dur) {
+    if (!ac) return;
+    var t = ac.currentTime + at, len = Math.floor(ac.sampleRate * dur);
+    var buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    var src = ac.createBufferSource(); src.buffer = buf;
+    var f = ac.createBiquadFilter(); f.type = "bandpass"; f.Q.value = 0.9;
+    f.frequency.setValueAtTime(350, t); f.frequency.exponentialRampToValueAtTime(2400, t + dur * 0.7);
+    var g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.06, t + dur * 0.45); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(f); f.connect(g); g.connect(master); src.start(t); src.stop(t + dur);
+  }
+  function chime(at) { tone(659.25, at, 0.9, 0.03, "sine"); tone(1318.5, at, 1.4, 0.035, "sine"); tone(1975.5, at + 0.03, 1.2, 0.02, "sine"); }
+  var NOTES = [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.5];
+
+  function play() {
+    playing = true;
+    startAudio();
+    intro.classList.add("play");
+    tone(196, 0, 0.32, 0.09, "sine", 392);                 /* pulinho da sacola */
+    var n = introArt.querySelectorAll(".logo-ch").length;
+    for (var i = 0; i < n; i++) pluck(NOTES[i % NOTES.length], 0.38 + i * 0.09);  /* uma nota por letra */
+    tone(2093, 0.25, 0.7, 0.012, "sine");                  /* brilho do clarão */
+    flyTimer = setTimeout(fly, 1550);
+  }
   function fly() {
     if (flown) return; flown = true;
+    clearTimeout(flyTimer);
+    whoosh(0, 0.8);                                        /* vento do voo */
+    chime(0.82);                                           /* sininho ao encaixar */
     var a = introArt.getBoundingClientRect(), b = heroArt.getBoundingClientRect();
     var s = b.width / Math.max(1, a.width);
     introArt.style.transition = "transform 0.9s cubic-bezier(0.65, 0, 0.35, 1)";
@@ -699,9 +772,10 @@ document.getElementById("sort").addEventListener("change", function (e) { state.
     intro.style.pointerEvents = "none";
     setTimeout(finish, 950);
   }
-  intro.addEventListener("click", fly);
-  setTimeout(fly, 2100);
-  setTimeout(finish, 5000);
+  intro.addEventListener("click", function () { if (!playing) play(); else fly(); });
+  intro.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (!playing) play(); else fly(); }
+  });
 })();
 
 renderSpot();
