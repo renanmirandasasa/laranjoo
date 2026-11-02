@@ -9,7 +9,8 @@ Arquivos usados para gerar o `index.html` da raiz. Não são publicados no site 
 - `build_site.py`: acrescenta o cabeçalho (título, prévia de link, ícones) e gera `index.html`.
   Espera `catalogo.html` e `brand/` na mesma pasta, e as imagens fixas em `entrega/laranjoo-site/`.
 - `painel.html`: cópia do Painel do Catálogo (só funciona publicado no Claude, com banco de dados e fotos).
-- `brand/`: logo sem fundo e ícone laranja.
+- `make_logo_art.py`: separa a logo em sacola + letras e gera `brand/logo-art.html` (usado pela animação de onda).
+- `brand/`: logo sem fundo, ícone laranja e a logo separada em peças (`logo-art.html`).
 
 Fluxo: cadastrar no painel → pedir ao Claude "publicar catálogo" → o Claude lê o painel, gera o
 `index.html`, faz commit neste repositório e a Netlify publica sozinha em laranjoo.netlify.app.

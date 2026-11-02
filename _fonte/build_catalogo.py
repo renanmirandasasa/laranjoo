@@ -69,6 +69,7 @@ def b64(path, mime):
     return "data:%s;base64,%s" % (mime, base64.b64encode(open(path, "rb").read()).decode())
 BRAND = os.path.join(os.path.dirname(os.path.abspath(__file__)), "brand")
 s = s.replace("__LOGO__", b64(os.path.join(BRAND, "logo.png"), "image/png"))
+s = s.replace("__LOGOART__", open(os.path.join(BRAND, "logo-art.html"), encoding="utf-8").read())
 s = s.replace("__TILE__", b64(os.path.join(BRAND, "tile.jpg"), "image/jpeg"))
 s = s.replace("__UPDATED__", (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=3)).strftime("%d/%m/%Y"))
 assert "__" not in re.sub(r"__[a-z]+__", "", s.replace("__LOGO__", "").replace("__TILE__", "").replace("__UPDATED__", "")) or True
