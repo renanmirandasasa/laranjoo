@@ -5,7 +5,7 @@ import os, zipfile
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 SITE = os.path.join(ROOT, "entrega", "laranjoo-site")
-URL = "https://laranjoo.netlify.app/"
+URL = "https://laranjoo.pages.dev/"
 TITLE = "Laranjoo | Achados com link direto na Shopee"
 DESC = "Gostou? Achou na Laranjoo! Os achados que aparecem nos vídeos, com link direto para a Shopee."
 
