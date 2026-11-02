@@ -113,15 +113,14 @@ h1.logo { margin: 0; line-height: 0; }
 .dots.run .dot[aria-current="true"]::after { animation: fill 5s linear forwards; }
 @keyframes fill { from { width: 0; } to { width: 100%; } }
 .dot:focus-visible { outline: 2px solid var(--btn-bg); outline-offset: 3px; }
-.track { display: grid; padding: 12px; touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; }
+.track { padding: 12px 6px; overflow: hidden; touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; }
 .track.grabbing { cursor: grabbing; }
 .track img { -webkit-user-drag: none; pointer-events: none; }
-.track.back .slide { transform: translateX(-24px); }
-.track.back .slide.on { transform: none; }
-.track.back .slide.out { transform: translateX(24px); }
-.slide { grid-area: 1 / 1; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; opacity: 0; visibility: hidden; transform: translateX(24px); transition: opacity 0.45s ease, transform 0.55s var(--spring), visibility 0s linear 0.45s; }
-.slide.on { opacity: 1; visibility: visible; transform: none; transition: opacity 0.45s ease, transform 0.55s var(--spring); }
-.slide.out { transform: translateX(-24px); }
+.strip { display: flex; will-change: transform; }
+.strip.anim { transition: transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1); }
+.slide { flex: 0 0 100%; min-width: 0; padding: 0 6px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; align-content: start; transform: scale(0.92); opacity: 0.5; transition: transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.45s ease; }
+.slide.on { transform: none; opacity: 1; }
+.strip.jump .slide { transition: none; }
 .slide .tile { aspect-ratio: 16 / 11; border-radius: 12px; }
 .spot-body { display: flex; flex-direction: column; gap: 8px; justify-content: center; min-width: 0; }
 .spot-name { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; line-height: 1.15; margin: 0; text-wrap: balance; overflow-wrap: anywhere; }
@@ -284,7 +283,7 @@ input:focus-visible, select:focus-visible, .chip:focus-visible, .btn:focus-visib
   .card:hover .tile img { transform: scale(1.06); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .slide, .slide.on, .mini, .chip, .dot { transition: none; }
+  .slide, .slide.on, .strip.anim, .mini, .chip, .dot { transition: none; }
   .dots.run .dot[aria-current="true"]::after { animation: none; }
 }
 </style>
@@ -537,42 +536,65 @@ mini.addEventListener("click", function (e) {
   window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
 });
 
-/* ---- Destaque rotativo ---- */
+/* ---- Destaque rotativo (carrossel contínuo) ---- */
 var spots = PRODUCTS.filter(function (p) { return p.destaque; });
-var cur = 0, timer = null;
+var N = spots.length, cur = 0, pos = 0, timer = null;
 var dotsEl = document.getElementById("dots");
+var trackEl = document.getElementById("track");
+var strip = null;
 
+function slideHtml(p, i, clone) {
+  var c = catById[p.cat];
+  return '<article class="slide"' + (clone ? ' aria-hidden="true" data-clone="1"' : ' aria-label="' + (i + 1) + ' de ' + N + '"') + '>' +
+    '<div class="tile' + (p.img ? ' photo' : '') + '">' + visual(p) + '</div>' +
+    '<div class="spot-body"><div class="spot-meta">' + (p.num ? '<span class="num-inline">Nº ' + pad(p.num) + '</span>' : '') + '<span class="cat">' + catIcon(c.id) + esc(c.nome) + '</span></div>' +
+    '<h2 class="spot-name">' + esc(p.nome) + '</h2>' + buy(p) + '</div></article>';
+}
 function renderSpot() {
-  if (!spots.length) { document.getElementById("spot").hidden = true; return; }
-  document.getElementById("track").innerHTML = spots.map(function (p, i) {
-    var c = catById[p.cat];
-    return '<article class="slide' + (i === 0 ? ' on' : '') + '" aria-label="' + (i + 1) + ' de ' + spots.length + '">' +
-      '<div class="tile' + (p.img ? ' photo' : '') + '">' + visual(p) + '</div>' +
-      '<div class="spot-body"><div class="spot-meta">' + (p.num ? '<span class="num-inline">Nº ' + pad(p.num) + '</span>' : '') + '<span class="cat">' + catIcon(c.id) + esc(c.nome) + '</span></div>' +
-      '<h2 class="spot-name">' + esc(p.nome) + '</h2>' + buy(p) + '</div></article>';
-  }).join("");
+  if (!N) { document.getElementById("spot").hidden = true; return; }
+  var html = spots.map(function (p, i) { return slideHtml(p, i, false); });
+  if (N > 1) { html.unshift(slideHtml(spots[N - 1], N - 1, true)); html.push(slideHtml(spots[0], 0, true)); }
+  trackEl.innerHTML = '<div class="strip" id="strip">' + html.join("") + '</div>';
+  strip = document.getElementById("strip");
   dotsEl.innerHTML = spots.map(function (p, i) {
     return '<button type="button" class="dot" data-i="' + i + '" aria-label="Destaque ' + (i + 1) + '" aria-current="' + (i === 0) + '"></button>';
   }).join("");
-  if (spots.length < 2) dotsEl.hidden = true;
+  if (N < 2) dotsEl.hidden = true;
+  [].forEach.call(strip.querySelectorAll('[data-clone] a'), function (a) { a.tabIndex = -1; });
+  setPos(N > 1 ? 1 : 0, false);
+  strip.addEventListener("transitionend", function (e) { if (e.target === strip && e.propertyName === "transform") fixEdges(); });
 }
-function show(i, dir) {
-  document.getElementById("track").classList.toggle("back", dir < 0);
-  var prev = cur;
-  cur = (i + spots.length) % spots.length;
-  var slides = document.querySelectorAll(".slide"), dots = document.querySelectorAll(".dot");
-  for (var k = 0; k < slides.length; k++) {
-    slides[k].classList.toggle("on", k === cur);
-    slides[k].classList.toggle("out", k === prev && k !== cur);
-    dots[k].setAttribute("aria-current", String(k === cur));
-  }
+function paint() {
+  var kids = strip.children;
+  for (var k = 0; k < kids.length; k++) kids[k].classList.toggle("on", k === pos);
+  cur = N > 1 ? (pos - 1 + N) % N : 0;
+  var dots = dotsEl.children;
+  for (var d = 0; d < dots.length; d++) dots[d].setAttribute("aria-current", String(d === cur));
 }
+function setPos(p, animate) {
+  pos = p;
+  strip.classList.toggle("anim", !!animate && !reduce);
+  strip.style.transform = "translateX(" + (-pos * 100) + "%)";
+  paint();
+  if (!animate || reduce) fixEdges();
+}
+/* Ao chegar num clone das pontas, salta sem animação para o produto real equivalente */
+function fixEdges() {
+  if (N < 2 || (pos > 0 && pos < N + 1)) return;
+  strip.classList.add("jump");
+  setPos(pos === 0 ? N : 1, false);
+  void strip.offsetWidth;
+  strip.classList.remove("jump");
+}
+function go(delta) { if (N < 2) return; fixEdges(); setPos(pos + delta, true); }
+function goTo(i) { if (N < 2) return; fixEdges(); setPos(i + 1, true); }
+
 function restartFill() { dotsEl.classList.remove("run"); void dotsEl.offsetWidth; dotsEl.classList.add("run"); }
 function play() {
   stop();
-  if (reduce || spots.length < 2) return;
+  if (reduce || N < 2) return;
   restartFill();
-  timer = setInterval(function () { show(cur + 1, 1); restartFill(); }, 5000);
+  timer = setInterval(function () { go(1); restartFill(); }, 5000);
 }
 function stop() { if (timer) { clearInterval(timer); timer = null; } dotsEl.classList.remove("run"); }
 
@@ -583,16 +605,16 @@ spotEl.addEventListener("focusin", stop);
 spotEl.addEventListener("focusout", play);
 dotsEl.addEventListener("click", function (e) {
   var b = e.target.closest(".dot");
-  if (b) { var n = Number(b.getAttribute("data-i")); show(n, n < cur ? -1 : 1); play(); }
+  if (b) { goTo(Number(b.getAttribute("data-i"))); play(); }
 });
 
-/* Arrastar para os lados (dedo no celular, mouse no computador) */
-var trackEl = document.getElementById("track");
+/* Arrastar: a fileira acompanha o dedo (ou o mouse) e desliza suave ao soltar */
 var drag = null, dragged = false, resumeTimer = null;
 function resumeLater() { clearTimeout(resumeTimer); resumeTimer = setTimeout(play, 6000); }
 trackEl.addEventListener("pointerdown", function (e) {
-  if (spots.length < 2 || (e.pointerType === "mouse" && e.button !== 0)) return;
-  drag = { x: e.clientX, y: e.clientY, id: e.pointerId, axis: null };
+  if (N < 2 || (e.pointerType === "mouse" && e.button !== 0)) return;
+  fixEdges();
+  drag = { x: e.clientX, y: e.clientY, id: e.pointerId, axis: null, w: trackEl.clientWidth || 1, lastX: e.clientX, lastT: performance.now(), v: 0 };
   dragged = false;
   clearTimeout(resumeTimer);
   stop();
@@ -607,21 +629,22 @@ trackEl.addEventListener("pointermove", function (e) {
   }
   if (drag.axis !== "x") return;
   dragged = true;
-  var s = trackEl.querySelector(".slide.on");
-  if (s) {
-    s.style.transition = "none";
-    s.style.transform = "translateX(" + dx + "px) rotate(" + (dx / 60) + "deg)";
-    s.style.opacity = String(1 - Math.min(0.5, Math.abs(dx) / 500));
-  }
+  var now = performance.now(), dt = Math.max(1, now - drag.lastT);
+  drag.v = 0.7 * drag.v + 0.3 * ((e.clientX - drag.lastX) / dt);
+  drag.lastX = e.clientX; drag.lastT = now;
+  strip.classList.remove("anim");
+  strip.style.transform = "translateX(calc(" + (-pos * 100) + "% + " + dx + "px))";
 });
 function endDrag(e) {
   if (!drag || e.pointerId !== drag.id) return;
-  var dx = e.clientX - drag.x, horizontal = drag.axis === "x";
-  var s = trackEl.querySelector(".slide.on");
-  if (s) { s.style.transition = ""; s.style.transform = ""; s.style.opacity = ""; }
+  var d = drag; drag = null;
   trackEl.classList.remove("grabbing");
-  drag = null;
-  if (horizontal && Math.abs(dx) > 45 && e.type === "pointerup") show(cur + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1);
+  if (d.axis === "x") {
+    var dx = e.clientX - d.x;
+    var flick = Math.abs(d.v) > 0.45 && Math.sign(d.v) === Math.sign(dx);
+    if (e.type === "pointerup" && (Math.abs(dx) > d.w * 0.2 || flick)) go(dx < 0 ? 1 : -1);
+    else setPos(pos, true);
+  }
   resumeLater();
 }
 trackEl.addEventListener("pointerup", endDrag);
