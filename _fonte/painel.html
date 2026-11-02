@@ -1,0 +1,474 @@
+<title>Painel do Catálogo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: coluna única; área de envio de fotos no topo, lista de produtos editáveis, ajustes da loja no fim */
+:root {
+  --bg: #FFF6EE;
+  --surface: #FFFFFF;
+  --ink: #231A15;
+  --muted: #75665D;
+  --line: #F4E3D6;
+  --accent: #D2430A;
+  --on-accent: #FFFFFF;
+  --soft: #FFEBDD; --soft-ink: #B93A08;
+  --ok-bg: #DDF3E4; --ok-fg: #17633A;
+  --warn-bg: #FFE0C7; --warn-fg: #8A2E05;
+  --danger: #B42318;
+  --ts: 40%; --tl: 91%;
+  --font-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1B1310; --surface: #271C17; --ink: #FBEFE7; --muted: #C2AB9C; --line: #3C2C23;
+    --accent: #F97316; --on-accent: #1B0F06; --soft: #3A2417; --soft-ink: #FDB27C;
+    --ok-bg: #1E3A28; --ok-fg: #9BE3B4; --warn-bg: #4B2812; --warn-fg: #FFC9A0; --danger: #F97066;
+    --ts: 22%; --tl: 20%;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1B1310; --surface: #271C17; --ink: #FBEFE7; --muted: #C2AB9C; --line: #3C2C23;
+  --accent: #F97316; --on-accent: #1B0F06; --soft: #3A2417; --soft-ink: #FDB27C;
+  --ok-bg: #1E3A28; --ok-fg: #9BE3B4; --warn-bg: #4B2812; --warn-fg: #FFC9A0; --danger: #F97066;
+  --ts: 22%; --tl: 20%;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 96px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 760px; margin: 0 auto; }
+header { padding-block: 24px 16px; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: 1.7rem; line-height: 1.05; margin: 0; letter-spacing: -0.01em; }
+.sub { margin: 6px 0 0; color: var(--muted); max-width: 52ch; }
+h2 { font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; margin: 0 0 10px; }
+
+.notice { background: var(--warn-bg); color: var(--warn-fg); border-radius: 12px; padding: 14px 16px; font-weight: 500; }
+
+.drop { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; padding: 26px 16px; border: 2px dashed var(--line); border-radius: 16px; background: var(--surface); transition: border-color 0.2s ease, background 0.2s ease; }
+.drop.over { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+.drop.off { opacity: 0.55; pointer-events: none; }
+.drop strong { font-family: var(--font-display); font-size: 1.2rem; }
+.drop p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.drop .acts { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.btn { font: inherit; font-weight: 700; font-size: 0.92rem; border: 0; border-radius: 10px; padding: 11px 18px; background: var(--accent); color: var(--on-accent); cursor: pointer; display: inline-block; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn:focus-visible, .ph:focus-visible, .del:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.stats { display: flex; gap: 8px; flex-wrap: wrap; padding-block: 18px 12px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 0.85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.stat b { color: var(--ink); }
+
+.list { display: grid; gap: 12px; }
+.item { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
+@media (max-width: 460px) { .item { grid-template-columns: 76px minmax(0, 1fr); gap: 12px; padding: 12px; } }
+.ph { position: relative; width: 100%; aspect-ratio: 1; border: 0; padding: 0; border-radius: 12px; overflow: hidden; cursor: pointer; background: var(--soft); color: var(--soft-ink); font: inherit; }
+.ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ph-empty { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; font-size: 0.75rem; font-weight: 700; padding: 6px; }
+.ph-swap { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 3px 0; text-align: center; }
+.ph.has .ph-empty { display: none; }
+.ph:not(.has) .ph-swap { display: none; }
+.fields { display: grid; gap: 10px; min-width: 0; }
+.f { display: grid; gap: 4px; min-width: 0; }
+label { font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; color: var(--muted); }
+input[type="text"], input[type="url"], textarea { font: inherit; font-size: 0.95rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; min-width: 0; }
+textarea { resize: vertical; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: end; }
+.sw { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); text-transform: none; letter-spacing: 0; font-size: 0.9rem; color: var(--ink); cursor: pointer; }
+.sw input { width: 18px; height: 18px; accent-color: var(--accent); }
+details summary { cursor: pointer; font-size: 0.82rem; color: var(--muted); }
+details textarea { margin-top: 8px; }
+.foot { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.numtag { font-family: var(--font-display); font-weight: 800; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.numtag:empty { display: none; }
+.pill { font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+.pill.ok { background: var(--ok-bg); color: var(--ok-fg); }
+.pill.warn { background: var(--warn-bg); color: var(--warn-fg); }
+.state { font-size: 0.8rem; color: var(--muted); }
+.del { margin-left: auto; font: inherit; font-size: 0.82rem; font-weight: 700; background: transparent; border: 0; color: var(--muted); cursor: pointer; padding: 6px 8px; border-radius: 8px; }
+.del.sure { color: var(--danger); }
+
+.empty { text-align: center; color: var(--muted); padding: 36px 12px; }
+.empty strong { display: block; color: var(--ink); font-family: var(--font-display); font-size: 1.15rem; margin-bottom: 4px; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-top: 22px; display: grid; gap: 12px; }
+.card p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.card ol { margin: 0; padding-left: 1.2em; color: var(--ink); display: grid; gap: 4px; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85em; background: var(--bg); padding: 2px 6px; border-radius: 6px; }
+
+.toast { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; justify-content: center; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); pointer-events: none; }
+.toast span { background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-size: 0.88rem; font-weight: 500; max-width: 100%; }
+@media (prefers-reduced-motion: no-preference) { .item { animation: pop 0.3s ease both; } @keyframes pop { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Painel do Catálogo</h1>
+    <p class="sub">Cadastre seus produtos e fotos aqui. Quando terminar, peça ao Claude na conversa para publicar o catálogo.</p>
+  </header>
+
+  <div class="notice" id="gate" hidden></div>
+
+  <div id="app">
+    <section class="drop" id="drop" aria-label="Adicionar fotos">
+      <strong>Arraste várias fotos de uma vez</strong>
+      <p>Cada foto vira um produto. Depois, em cada um, cole o nome e o link com Ctrl+V e aperte Enter para ir ao próximo campo.</p>
+      <div class="acts">
+        <label class="btn" for="file">Escolher fotos</label>
+        <input id="file" type="file" accept="image/*" multiple hidden>
+        <button type="button" class="btn ghost" id="addBlank">Adicionar sem foto</button>
+      </div>
+    </section>
+
+    <div class="stats" id="stats" aria-live="polite"></div>
+    <section class="list" id="list"></section>
+    <div class="empty" id="empty" hidden><strong>Nenhum produto ainda</strong>Arraste as fotos acima para começar.</div>
+
+    <section class="card">
+      <h2>Dados da loja</h2>
+      <div class="f"><label for="shopName">Nome que aparece no catálogo</label><input id="shopName" type="text" maxlength="60" placeholder="Achados da Casa"></div>
+      <div class="f"><label for="shopBio">Frase abaixo do nome</label><textarea id="shopBio" rows="2" maxlength="160" placeholder="Gostou? Achou na Laranjoo!"></textarea></div>
+      <div class="f"><label for="shopTiktok">Seu @ do TikTok</label><input id="shopTiktok" type="text" maxlength="80" placeholder="@laranjoo" autocomplete="off"></div>
+      <div class="f"><label for="shopInsta">Seu @ do Instagram (opcional)</label><input id="shopInsta" type="text" maxlength="80" placeholder="@laranjoo" autocomplete="off"></div>
+      <span class="state" id="shopState"></span>
+    </section>
+
+    <section class="card">
+      <h2>Como publicar</h2>
+      <ol>
+        <li>Envie as fotos e preencha nome e link de afiliado de cada produto.</li>
+        <li>Quando todos estiverem como "Pronto", volte à conversa com o Claude.</li>
+        <li>Escreva: <code>publicar catálogo</code>. Ele atualiza a página que você usa na bio.</li>
+      </ol>
+      <p>Este painel é só seu. Não compartilhe o link dele, compartilhe apenas o catálogo.</p>
+    </section>
+  </div>
+</div>
+
+<datalist id="cats">
+  <option value="Casa e cozinha"><option value="Eletrônicos"><option value="Ferramentas"><option value="Cuidados pessoais">
+  <option value="Organização"><option value="Limpeza"><option value="Banheiro"><option value="Quarto e sala"><option value="Lavanderia"><option value="Pets"><option value="Outros">
+</datalist>
+<input id="replace" type="file" accept="image/*" hidden>
+<div class="toast" aria-live="polite"><span id="toast" hidden></span></div>
+
+<script>
+var MAX_SIDE = 900;
+var $ = function (id) { return document.getElementById(id); };
+var dbx = null, assets = null;
+var cards = {};
+var pending = {};
+var loaded = false;
+var replaceId = null;
+var jobs = Promise.resolve();
+var toastTimer = null;
+
+function toast(msg, ms) {
+  var t = $("toast");
+  clearTimeout(toastTimer);
+  if (!msg) { t.hidden = true; return; }
+  t.textContent = msg; t.hidden = false;
+  if (ms !== 0) toastTimer = setTimeout(function () { t.hidden = true; }, ms || 3500);
+}
+function gate(msg) { var g = $("gate"); g.textContent = msg; g.hidden = false; $("app").hidden = true; }
+function validLink(s) { return /^https?:\/\/\S+$/.test(s); }
+
+/* ---------- boot ---------- */
+async function boot() {
+  var c = window.claude;
+  if (!c || !c.use) { gate("Abra esta página dentro do Claude, conectado à sua conta."); return; }
+  var user = await c.use("user");
+  if (user && (await user.canEdit()) === false) { gate("Este painel é só para o dono do catálogo."); return; }
+  dbx = await c.use("db");
+  assets = await c.use("assets");
+  if (!dbx) { gate("Não consegui abrir o banco de dados. Entre na sua conta Claude e recarregue a página."); return; }
+  if (!assets) { $("drop").classList.add("off"); toast("O envio de fotos não está disponível nesta conta.", 6000); }
+  $("stats").textContent = "Carregando seus produtos…";
+  var slow = setTimeout(function () { $("stats").textContent = "Ainda carregando. Confira sua conexão."; }, 10000);
+  dbx.collection("products").onSnapshot(function (snap) { clearTimeout(slow); loaded = true; applyProducts(snap); },
+    function () { clearTimeout(slow); gate("Não consegui ler os produtos. Recarregue a página."); });
+  dbx.doc("config/site").onSnapshot(applyShop, function () {});
+}
+
+/* ---------- lista ---------- */
+function makeCard(id) {
+  var el = document.createElement("article");
+  el.className = "item"; el.dataset.id = id;
+  el.innerHTML =
+    '<button type="button" class="ph" data-act="photo" aria-label="Trocar foto"><img alt="" hidden><span class="ph-empty">Adicionar foto</span><span class="ph-swap">Trocar</span></button>' +
+    '<div class="fields">' +
+      '<div class="f"><label for="n-' + id + '">Nome do produto</label><input id="n-' + id + '" data-f="nome" type="text" maxlength="120" placeholder="Ex.: Garrafa térmica inox"></div>' +
+      '<div class="f"><label for="l-' + id + '">Link de afiliado</label><input id="l-' + id + '" data-f="link" type="url" inputmode="url" placeholder="https://s.shopee.com.br/..."></div>' +
+      '<div class="two"><div class="f"><label for="c-' + id + '">Categoria</label><input id="c-' + id + '" data-f="categoria" type="text" list="cats" maxlength="40" placeholder="Escolha ou digite"></div>' +
+      '<label class="sw" for="d-' + id + '"><input id="d-' + id + '" data-f="destaque" type="checkbox"><span>Destaque</span></label></div>' +
+      '<details><summary>Título original da Shopee (opcional)</summary><textarea id="t-' + id + '" data-f="completo" rows="2" maxlength="300"></textarea></details>' +
+      '<div class="foot"><span class="numtag" data-role="num"></span><span class="pill" data-role="pill"></span><span class="state" data-role="state"></span><button type="button" class="del" data-act="del">Excluir</button></div>' +
+    '</div>';
+  return { el: el, data: null, img: el.querySelector("img"), ph: el.querySelector(".ph") };
+}
+function setVal(input, v) {
+  v = v == null ? "" : String(v);
+  if (document.activeElement !== input && input.value !== v) input.value = v;
+}
+function fillCard(card, d) {
+  var el = card.el;
+  setVal(el.querySelector('[data-f="nome"]'), d.nome);
+  setVal(el.querySelector('[data-f="link"]'), d.link);
+  setVal(el.querySelector('[data-f="categoria"]'), d.categoria);
+  setVal(el.querySelector('[data-f="completo"]'), d.completo);
+  var cb = el.querySelector('[data-f="destaque"]');
+  if (document.activeElement !== cb) cb.checked = !!d.destaque;
+  var src = d.imgId ? "/_blob/" + d.imgId : "";
+  if (card.src !== src) {
+    card.src = src;
+    if (src) { card.img.src = src; card.img.hidden = false; } else { card.img.removeAttribute("src"); card.img.hidden = true; }
+    card.ph.classList.toggle("has", !!src);
+  }
+  el.querySelector('[data-role="num"]').textContent = d.num ? "Nº " + (d.num < 10 ? "0" + d.num : d.num) : "";
+  var miss = [];
+  if (!d.imgId) miss.push("foto");
+  if (!(d.nome || "").trim()) miss.push("nome");
+  if (!(d.link || "").trim()) miss.push("link");
+  else if (!validLink(d.link.trim())) miss.push("link válido");
+  var pill = el.querySelector('[data-role="pill"]');
+  pill.textContent = miss.length ? "Falta: " + miss.join(", ") : "Pronto";
+  pill.className = "pill " + (miss.length ? "warn" : "ok");
+  card.ready = miss.length === 0;
+  card.miss = miss;
+  card.data = d;
+}
+function applyProducts(snap) {
+  var docs = snap.docs.map(function (s) { return { id: s.id, data: s.data() || {} }; });
+  docs.sort(function (a, b) { return (a.data.ordem || 0) - (b.data.ordem || 0); });
+  var list = $("list"), seen = {};
+  docs.forEach(function (d, i) {
+    seen[d.id] = 1;
+    var card = cards[d.id];
+    if (!card) { card = makeCard(d.id); cards[d.id] = card; }
+    fillCard(card, d.data);
+    if (list.children[i] !== card.el) list.insertBefore(card.el, list.children[i] || null);
+  });
+  Object.keys(cards).forEach(function (id) { if (!seen[id]) { cards[id].el.remove(); delete cards[id]; } });
+  updateStats();
+}
+function updateStats() {
+  var ids = Object.keys(cards), n = ids.length, ready = 0, noPhoto = 0, noLink = 0;
+  ids.forEach(function (id) {
+    var c = cards[id];
+    if (c.ready) ready++;
+    if (c.miss.indexOf("foto") > -1) noPhoto++;
+    if (c.miss.indexOf("link") > -1 || c.miss.indexOf("link válido") > -1) noLink++;
+  });
+  var box = $("stats");
+  box.textContent = "";
+  [[n, n === 1 ? "produto" : "produtos"], [ready, ready === 1 ? "pronto" : "prontos"], [noPhoto, "sem foto"], [noLink, "sem link"]].forEach(function (p) {
+    var s = document.createElement("span"); s.className = "stat";
+    var b = document.createElement("b"); b.textContent = p[0];
+    s.appendChild(b); s.appendChild(document.createTextNode(" " + p[1]));
+    box.appendChild(s);
+  });
+  $("empty").hidden = !loaded || n > 0;
+}
+
+/* ---------- salvar edições ---------- */
+function setState(id, text) {
+  var c = cards[id]; if (!c) return;
+  var s = c.el.querySelector('[data-role="state"]'); s.textContent = text;
+  if (text === "Salvo") setTimeout(function () { if (s.textContent === "Salvo") s.textContent = ""; }, 2000);
+}
+function queue(id, patch, delay) {
+  var p = pending[id] || (pending[id] = { patch: {}, timer: null, chain: Promise.resolve() });
+  Object.assign(p.patch, patch);
+  clearTimeout(p.timer);
+  if (delay === 0) flush(id); else p.timer = setTimeout(function () { flush(id); }, delay);
+}
+function flush(id) {
+  var p = pending[id];
+  if (!p) return;
+  clearTimeout(p.timer);
+  if (!Object.keys(p.patch).length) return;
+  var patch = p.patch; p.patch = {};
+  setState(id, "Salvando…");
+  p.chain = p.chain.then(function () { return dbx.doc("products/" + id).update(patch); }).then(
+    function () { setState(id, "Salvo"); },
+    function () { p.patch = Object.assign({}, patch, p.patch); setState(id, "Não salvou. Tente de novo."); }
+  );
+}
+$("list").addEventListener("input", function (e) {
+  var t = e.target, f = t.dataset && t.dataset.f;
+  if (!f || f === "destaque") return;
+  var id = t.closest(".item").dataset.id, patch = {};
+  patch[f] = f === "link" ? t.value.trim() : t.value;
+  queue(id, patch, 700);
+});
+$("list").addEventListener("change", function (e) {
+  var t = e.target, f = t.dataset && t.dataset.f;
+  if (!f) return;
+  var id = t.closest(".item").dataset.id, patch = {};
+  patch[f] = f === "destaque" ? t.checked : (f === "link" ? t.value.trim() : t.value);
+  queue(id, patch, 0);
+});
+$("list").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-act]");
+  if (!b) return;
+  var id = b.closest(".item").dataset.id;
+  if (b.dataset.act === "photo") { if (!assets) return; replaceId = id; $("replace").click(); }
+  if (b.dataset.act === "del") {
+    if (!b.classList.contains("sure")) {
+      b.classList.add("sure"); b.textContent = "Confirmar exclusão";
+      setTimeout(function () { b.classList.remove("sure"); b.textContent = "Excluir"; }, 4000);
+    } else removeProduct(id);
+  }
+});
+$("list").addEventListener("keydown", function (e) {
+  var t = e.target;
+  if (e.key !== "Enter" || !t.dataset || (t.dataset.f !== "nome" && t.dataset.f !== "link")) return;
+  e.preventDefault();
+  var item = t.closest(".item"), next;
+  if (t.dataset.f === "nome") next = item.querySelector('[data-f="link"]');
+  else {
+    var sib = item.nextElementSibling;
+    next = sib && sib.querySelector('[data-f="nome"]');
+  }
+  if (next) next.focus(); else t.blur();
+});
+async function removeProduct(id) {
+  var c = cards[id], imgId = c && c.data && c.data.imgId;
+  try {
+    await dbx.doc("products/" + id).delete();
+    if (imgId && assets) assets.delete(imgId).catch(function () {});
+    toast("Produto excluído.");
+  } catch (e) { toast("Não consegui excluir. Tente de novo."); }
+}
+
+/* ---------- fotos ---------- */
+function loadImg(file) {
+  return new Promise(function (res, rej) {
+    var u = URL.createObjectURL(file), im = new Image();
+    im.onload = function () { URL.revokeObjectURL(u); res(im); };
+    im.onerror = function () { URL.revokeObjectURL(u); rej(new Error("img")); };
+    im.src = u;
+  });
+}
+async function compress(file) {
+  var bmp;
+  try { bmp = await createImageBitmap(file); } catch (e) { bmp = await loadImg(file); }
+  var w = bmp.width || bmp.naturalWidth, h = bmp.height || bmp.naturalHeight;
+  var s = Math.min(1, MAX_SIDE / Math.max(w, h));
+  var cv = document.createElement("canvas");
+  cv.width = Math.max(1, Math.round(w * s)); cv.height = Math.max(1, Math.round(h * s));
+  var ctx = cv.getContext("2d");
+  ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.drawImage(bmp, 0, 0, cv.width, cv.height);
+  return new Promise(function (res, rej) { cv.toBlob(function (b) { b ? res(b) : rej(new Error("blob")); }, "image/jpeg", 0.84); });
+}
+function guessName(file) {
+  var n = (file.name || "").replace(/\.[a-z0-9]+$/i, "").replace(/[_-]+/g, " ").trim();
+  if (!n || /^(img|image|imagem|photo|foto|whatsapp|screenshot|captura|print|pxl|dsc|\d)/i.test(n)) return "";
+  return n.slice(0, 120);
+}
+var numReserved = 0;
+function nextNum() {
+  var max = numReserved;
+  Object.keys(cards).forEach(function (id) { var n = cards[id].data && cards[id].data.num; if (n > max) max = n; });
+  numReserved = max + 1;
+  return numReserved;
+}
+function focusNew(ids) {
+  if (!ids.length) return;
+  setTimeout(function () {
+    var c = cards[ids[0]];
+    var field = c && c.el.querySelector('[data-f="nome"]');
+    if (field) field.focus();
+  }, 350);
+}
+function addFiles(fileList) {
+  var files = Array.prototype.filter.call(fileList, function (f) { return /^image\//.test(f.type) || /\.(jpe?g|png|webp|gif)$/i.test(f.name || ""); });
+  if (!assets) { toast("O envio de fotos não está disponível."); return; }
+  if (!files.length) { toast("Não encontrei imagens nesses arquivos. Use JPG, PNG ou WebP."); return; }
+  jobs = jobs.then(async function () {
+    var ok = 0, fail = 0, base = Date.now(), created = [];
+    for (var i = 0; i < files.length; i++) {
+      toast("Enviando foto " + (i + 1) + " de " + files.length + "…", 0);
+      try {
+        var blob = await compress(files[i]);
+        var up = await assets.upload(blob, { type: "image/jpeg" });
+        var ref = dbx.collection("products").doc();
+        await ref.set({
+          nome: guessName(files[i]), completo: "", categoria: "", link: "", destaque: false,
+          imgId: up.id, num: nextNum(), ordem: base + i, criadoEm: new Date().toISOString()
+        });
+        created.push(ref.id);
+        ok++;
+      } catch (e) { fail++; }
+    }
+    focusNew(created);
+    toast(fail ? ok + " enviadas, " + fail + " falharam (tente JPG, PNG ou WebP)." : ok + (ok === 1 ? " foto adicionada. Preencha nome e link." : " fotos adicionadas. Preencha nome e link de cada uma."), 5000);
+  });
+}
+$("file").addEventListener("change", function (e) { addFiles(e.target.files); e.target.value = ""; });
+$("addBlank").addEventListener("click", async function () {
+  try {
+    await dbx.collection("products").doc().set({ nome: "", completo: "", categoria: "", link: "", destaque: false, imgId: null, num: nextNum(), ordem: Date.now(), criadoEm: new Date().toISOString() });
+  } catch (e) { toast("Não consegui adicionar. Tente de novo."); }
+});
+$("replace").addEventListener("change", async function (e) {
+  var file = e.target.files[0], id = replaceId; e.target.value = "";
+  if (!file || !id || !cards[id]) return;
+  var old = cards[id].data && cards[id].data.imgId;
+  try {
+    toast("Trocando a foto…", 0);
+    var up = await assets.upload(await compress(file), { type: "image/jpeg" });
+    await dbx.doc("products/" + id).update({ imgId: up.id });
+    if (old) assets.delete(old).catch(function () {});
+    toast("Foto trocada.");
+  } catch (err) { toast("Não consegui trocar a foto. Tente JPG, PNG ou WebP."); }
+});
+
+var drop = $("drop");
+["dragenter", "dragover"].forEach(function (n) { document.addEventListener(n, function (e) { e.preventDefault(); drop.classList.add("over"); }); });
+document.addEventListener("dragleave", function (e) { e.preventDefault(); if (!e.relatedTarget) drop.classList.remove("over"); });
+document.addEventListener("drop", function (e) {
+  e.preventDefault(); drop.classList.remove("over");
+  if (e.dataTransfer && e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+});
+document.addEventListener("paste", function (e) {
+  var t = e.target;
+  if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+  var cd = e.clipboardData;
+  if (!cd || cd.getData("text/plain")) return;
+  if (cd.files && cd.files.length) { e.preventDefault(); addFiles(cd.files); }
+});
+
+/* ---------- dados da loja ---------- */
+var shopChain = Promise.resolve(), shopTimer = null;
+function applyShop(snap) {
+  var d = snap.exists ? snap.data() : {};
+  setVal($("shopName"), d.nome); setVal($("shopBio"), d.bio);
+  setVal($("shopTiktok"), d.tiktok); setVal($("shopInsta"), d.instagram);
+}
+function saveShop() {
+  clearTimeout(shopTimer);
+  shopTimer = setTimeout(function () {
+    var data = { nome: $("shopName").value.trim(), bio: $("shopBio").value.trim(), tiktok: $("shopTiktok").value.trim(), instagram: $("shopInsta").value.trim() };
+    $("shopState").textContent = "Salvando…";
+    shopChain = shopChain.then(function () { return dbx.doc("config/site").set(data); }).then(
+      function () { $("shopState").textContent = "Salvo"; setTimeout(function () { $("shopState").textContent = ""; }, 2000); },
+      function () { $("shopState").textContent = "Não salvou. Tente de novo."; });
+  }, 700);
+}
+$("shopName").addEventListener("input", saveShop);
+$("shopBio").addEventListener("input", saveShop);
+$("shopTiktok").addEventListener("input", saveShop);
+$("shopInsta").addEventListener("input", saveShop);
+
+boot();
+</script>
