@@ -661,7 +661,7 @@ function renderFollow() {
   if (!tk && !ig) return;
   var html = "";
   if (tk) html += '<a class="sbtn" href="https://www.tiktok.com/@' + esc(tk) + '" target="_blank" rel="noopener">' + ico(ICON_NOTE) + 'Seguir no TikTok <small>@' + esc(tk) + '</small></a>';
-  if (ig) html += '<a class="sbtn ghost" href="https://www.instagram.com/' + esc(ig) + '" target="_blank" rel="noopener">' + ico(ICON_CAM) + 'Instagram</a>';
+  if (ig) html += '<a class="sbtn ghost" href="https://www.instagram.com/' + esc(ig) + '" target="_blank" rel="noopener">' + ico(ICON_CAM) + 'Seguir no Instagram</a>';
   document.getElementById("followActs").innerHTML = html;
   document.getElementById("follow").hidden = false;
 }
