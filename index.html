@@ -491,31 +491,46 @@ input:focus-visible, select:focus-visible, .chip:focus-visible, .btn:focus-visib
 /* Gerado a partir do Painel do Catálogo. Para mudar produtos, edite no painel e peça ao Claude para publicar. */
 var CATEGORIES = [
  {
-  "id": "cuidados-pessoais",
-  "nome": "Cuidados pessoais",
+  "id": "cabelo",
+  "nome": "Cabelo",
   "hue": 25
+ },
+ {
+  "id": "skincare",
+  "nome": "Skincare",
+  "hue": 215
+ },
+ {
+  "id": "perfumes",
+  "nome": "Perfumes",
+  "hue": 45
+ },
+ {
+  "id": "maquiagem",
+  "nome": "Maquiagem",
+  "hue": 335
  },
  {
   "id": "casa-e-cozinha",
   "nome": "Casa e cozinha",
-  "hue": 215
+  "hue": 150
  },
  {
   "id": "eletronicos",
   "nome": "Eletrônicos",
-  "hue": 45
+  "hue": 265
  },
  {
   "id": "ferramentas",
   "nome": "Ferramentas",
-  "hue": 335
+  "hue": 190
  }
 ];
 var PRODUCTS = [
  {
   "nome": "Escova Secadora 1300W Bivolt Modeladora",
   "completo": "Escova secadora 1300W, escova bivolt, secador alisador, escova modeladora, escova cabelo profissional",
-  "cat": "cuidados-pessoais",
+  "cat": "cabelo",
   "icon": "box",
   "destaque": true,
   "link": "https://s.shopee.com.br/60SrDNLV5Y",
@@ -526,7 +541,7 @@ var PRODUCTS = [
  {
   "nome": "Sérum Vitamina C23 COSRX 2ª Geração 20g",
   "completo": "[Odor ZERO / Renovação] Sérum de Vitamina C23 COSRX 2ª Geração 20g Alta Concentração",
-  "cat": "cuidados-pessoais",
+  "cat": "skincare",
   "icon": "box",
   "destaque": true,
   "link": "https://s.shopee.com.br/5fq0olMllS",
@@ -537,7 +552,7 @@ var PRODUCTS = [
  {
   "nome": "Perfume Feminino Serenza Alta Fixação",
   "completo": "Perfumes Femininos Serenza Fragrâncias Importadas Inspirações Marcantes Alta Fixação e Longa Duração",
-  "cat": "cuidados-pessoais",
+  "cat": "perfumes",
   "icon": "box",
   "destaque": true,
   "link": "https://s.shopee.com.br/4B1D20SToG",
@@ -548,7 +563,7 @@ var PRODUCTS = [
  {
   "nome": "Kit 3 Máscaras SOS Hidratação e SOS Bomba Salon Line",
   "completo": "Kit com 2 Máscaras de Hidratação SOS Hidratação + 1 Máscara de Hidratação SOS Bomba Original Salon Line",
-  "cat": "cuidados-pessoais",
+  "cat": "cabelo",
   "icon": "box",
   "destaque": false,
   "link": "https://s.shopee.com.br/5VWacSNP6P",
@@ -559,7 +574,7 @@ var PRODUCTS = [
  {
   "nome": "Perfume Brand Collection Nº 179 25ml",
   "completo": "Perfume importado perfumes original Perfume Feminino Brand Collection No 179 - Inspiração Passione 25ml",
-  "cat": "cuidados-pessoais",
+  "cat": "perfumes",
   "icon": "box",
   "destaque": false,
   "link": "https://s.shopee.com.br/6L5hbzKEPe",
@@ -570,7 +585,7 @@ var PRODUCTS = [
  {
   "nome": "Kit de Pincéis e Esponja de Maquiagem",
   "completo": "Pincéis e Esponja de Maquiagem Kit de Pincéis e Esponja para Base, Esponja de Maquiagem, Esponja de Pó, Esponja de",
-  "cat": "cuidados-pessoais",
+  "cat": "maquiagem",
   "icon": "box",
   "destaque": false,
   "link": "https://s.shopee.com.br/40hmphT79F",
@@ -581,7 +596,7 @@ var PRODUCTS = [
  {
   "nome": "Body Splash Carmin Glow E&G Essence",
   "completo": "Body Splash Carmin Glow E&G Essence inspiração Carmina Creed /perfume importado/alta fixação/perfume feminino marcante",
-  "cat": "cuidados-pessoais",
+  "cat": "perfumes",
   "icon": "box",
   "destaque": false,
   "link": "https://s.shopee.com.br/6VP7oIJb4h",
@@ -592,7 +607,7 @@ var PRODUCTS = [
  {
   "nome": "Kit Antissinais Dia e Noite: Sérum Vitamina C VC-10 + Retinol Rn-0,3",
   "completo": "Antissinais Dia e Noite c/ Vitamina VC-10 + Sérum Retinol Rn-0,3 - Vitamina C Para o Rosto - Serum Facial",
-  "cat": "cuidados-pessoais",
+  "cat": "skincare",
   "icon": "box",
   "destaque": false,
   "link": "https://s.shopee.com.br/5q9R14M8QV",
@@ -603,7 +618,7 @@ var PRODUCTS = [
  {
   "nome": "Kit Suporte para Escova Secadora e Secador",
   "completo": "KIT Suporte de Escova Secadora e Secador de Cabelo + Descanso de Mesa para Escova Secadora de Cabelo",
-  "cat": "cuidados-pessoais",
+  "cat": "cabelo",
   "icon": "box",
   "destaque": false,
   "link": "https://s.shopee.com.br/6AmHPgKrkb",
@@ -614,7 +629,7 @@ var PRODUCTS = [
  {
   "nome": "Kit 3 Esponjas + Pincel com Estojo Transparente",
   "completo": "Kit Esponja de Maquiagem 3 Esponjas 1 Pincel para Base e Corretivo Estojo Transparente Kit Maquiagem Feminino",
-  "cat": "cuidados-pessoais",
+  "cat": "maquiagem",
   "icon": "box",
   "destaque": false,
   "link": "https://s.shopee.com.br/4Ve3QcRD8M",
@@ -709,6 +724,10 @@ var CAT_ICONS = {
   "limpeza": '<path d="M9 9h6l2 11H7z"/><path d="M12 9V4M10 4h5l2 2"/>',
   "banheiro": '<path d="M4 12h16v2a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M6 12V6a2 2 0 0 1 4 0"/>',
   "lavanderia": '<rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="13" r="4.5"/><path d="M8 6h.01M11 6h.01"/>',
+  "cabelo": '<path d="M4 7h3l2-2h6l2 2h3v4H4z"/><path d="M7 11v8M10 11v8M14 11v8M17 11v8"/>',
+  "perfumes": '<rect x="6" y="9" width="12" height="12" rx="3"/><path d="M10 9V6h4v3M9 3h6"/><path d="M10 15h4"/>',
+  "skincare": '<path d="M9 9h6v10a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2z"/><path d="M10 9V6h4v3"/><path d="M12 3c-1 1-1 2 0 3"/>',
+  "maquiagem": '<path d="M9 21h6v-6l-1-1V7l-2-4-2 4v7l-1 1z"/><path d="M9 15h6"/>',
   "pets": '<circle cx="7" cy="10" r="1.8"/><circle cx="17" cy="10" r="1.8"/><circle cx="10" cy="6" r="1.8"/><circle cx="14" cy="6" r="1.8"/><path d="M8 17a4 4 0 0 1 8 0c0 2-2 3-4 3s-4-1-4-3z"/>',
   "default": '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/>'
 };
