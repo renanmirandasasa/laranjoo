@@ -27,6 +27,7 @@
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
+<script>try{var _tm=localStorage.getItem("laranjoo-tema");if(_tm==="dark"||_tm==="light")document.documentElement.setAttribute("data-theme",_tm)}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -341,6 +342,55 @@ input:focus-visible, select:focus-visible, .chip:focus-visible, .btn:focus-visib
   .slide, .slide.on, .strip.anim, .mini, .chip, .dot { transition: none; }
   .dots.run .dot[aria-current="true"]::after { animation: none; }
 }
+/* ---------- Tema claro/escuro: chave de arrastar (dia → noite) ---------- */
+@property --t { syntax: "<number>"; inherits: true; initial-value: 0; }
+.theme { margin-top: 14px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.tgl { --t: 0; --W: 128px; --H: 50px; --K: 40px; position: relative; flex: none; width: var(--W); height: var(--H); padding: 0; border: 0; border-radius: 999px; overflow: hidden; isolation: isolate; cursor: grab; touch-action: pan-y; -webkit-tap-highlight-color: transparent; background: #FFC28A; box-shadow: inset 0 2px 7px rgba(60, 20, 0, 0.28), 0 8px 20px -12px rgba(190, 70, 0, 0.8); transition: --t 0.6s var(--spring); }
+.tgl.drag { transition: none; cursor: grabbing; }
+.tgl:focus-visible { outline: 3px solid var(--brand); outline-offset: 3px; }
+.tgl .tg-sky { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; }
+.tgl .tg-day { background: radial-gradient(120% 140% at 15% 0%, #FFE3B8 0%, transparent 55%), linear-gradient(180deg, #FF9F55 0%, #FFC994 100%); opacity: calc(1 - var(--t)); }
+.tgl .tg-nite { background: radial-gradient(90% 120% at 85% 10%, #4A2E6E 0%, transparent 60%), linear-gradient(180deg, #0F0B24 0%, #2A1A45 100%); opacity: var(--t); }
+.tgl .tg-clouds { position: absolute; inset: 0; pointer-events: none; opacity: calc(1 - var(--t) * 1.6); transform: translateY(calc(var(--t) * 26px)); }
+.tgl .tg-clouds i { position: absolute; display: block; background: #FFF8F0; border-radius: 999px; box-shadow: 0 2px 4px rgba(170, 70, 10, 0.18); }
+.tgl .tg-clouds i::before, .tgl .tg-clouds i::after { content: ""; position: absolute; background: inherit; border-radius: 50%; }
+.tgl .c1 { right: 16px; top: 26px; width: 34px; height: 11px; }
+.tgl .c1::before { width: 15px; height: 15px; left: 5px; top: -8px; }
+.tgl .c1::after { width: 11px; height: 11px; left: 16px; top: -5px; }
+.tgl .c2 { right: 40px; top: 12px; width: 22px; height: 8px; opacity: 0.85; }
+.tgl .c2::before { width: 10px; height: 10px; left: 4px; top: -5px; }
+.tgl .c2::after { width: 0; height: 0; }
+.tgl .tg-stars { position: absolute; inset: 0; pointer-events: none; opacity: var(--t); transform: translateY(calc((1 - var(--t)) * -18px)); }
+.tgl .tg-stars i { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: #FFF4E0; box-shadow: 0 0 4px 1px rgba(255, 236, 200, 0.7); }
+.tgl .tg-stars i.b { width: 3px; height: 3px; }
+.tgl .tg-knob { position: absolute; top: calc((var(--H) - var(--K)) / 2); left: calc(5px + var(--t) * (var(--W) - var(--K) - 10px)); width: var(--K); height: var(--K); border-radius: 50%; pointer-events: none; transform: rotate(calc(var(--t) * -160deg)); box-shadow: 0 4px 10px rgba(40, 10, 0, 0.35), 0 0 calc((1 - var(--t)) * 16px + 2px) calc((1 - var(--t)) * 4px) rgba(255, 190, 60, calc(0.85 - var(--t) * 0.5)); }
+.tgl .tg-sun, .tgl .tg-moon { position: absolute; inset: 0; border-radius: 50%; }
+.tgl .tg-sun { background: radial-gradient(circle at 34% 30%, #FFF3A6 0%, #FFC93C 38%, #FF9A1F 78%, #F4741A 100%); opacity: calc(1 - var(--t)); }
+.tgl .tg-moon { background: radial-gradient(circle at 34% 30%, #FFFDF6 0%, #F0E6D6 55%, #CDBEA8 100%); opacity: var(--t); overflow: hidden; }
+.tgl .tg-moon i { position: absolute; border-radius: 50%; background: rgba(150, 130, 105, 0.35); box-shadow: inset 1px 1px 2px rgba(90, 70, 50, 0.35); }
+.tgl .tg-moon i:nth-child(1) { width: 11px; height: 11px; left: 9px; top: 9px; }
+.tgl .tg-moon i:nth-child(2) { width: 7px; height: 7px; left: 22px; top: 23px; }
+.tgl .tg-moon i:nth-child(3) { width: 5px; height: 5px; left: 25px; top: 9px; }
+.theme-msg { margin: 0; display: flex; flex-direction: column; gap: 2px; font-size: 0.74rem; line-height: 1.35; color: var(--muted); max-width: 46ch; }
+.theme-msg strong { display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-weight: 700; color: var(--soft-ink); letter-spacing: 0.01em; white-space: nowrap; }
+.theme-msg svg { width: 12px; height: 12px; fill: var(--brand); flex: none; }
+#themeHint { transition: opacity 0.25s ease; }
+@media (min-width: 640px) {
+  .theme { flex-direction: row; justify-content: center; gap: 16px; text-align: left; }
+  .theme-msg strong { justify-content: flex-start; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tgl .tg-stars i { animation: tw 2.6s ease-in-out infinite; animation-delay: calc(var(--d) * -0.45s); }
+  .tgl .tg-clouds .c1 { animation: drift 6s ease-in-out infinite alternate; }
+  .tgl .tg-clouds .c2 { animation: drift 7.5s ease-in-out infinite alternate-reverse; }
+  .tgl:not(.drag):hover .tg-knob { scale: 1.05; }
+  .tgl .tg-knob { transition: scale 0.3s var(--spring); }
+}
+@keyframes tw { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+@keyframes drift { from { translate: -3px 0; } to { translate: 4px 0; } }
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) { z-index: 2; }
 </style>
 
 <div class="intro" id="intro" role="button" tabindex="0" aria-label="Entrar no site da Laranjoo">
@@ -370,6 +420,17 @@ input:focus-visible, select:focus-visible, .chip:focus-visible, .btn:focus-visib
     </div>
     <span class="melt" aria-hidden="true"></span>
   </section>
+
+  <div class="theme">
+    <button class="tgl" id="tgl" type="button" role="switch" aria-checked="false" aria-label="Tema escuro">
+      <span class="tg-sky tg-day" aria-hidden="true"></span>
+      <span class="tg-sky tg-nite" aria-hidden="true"></span>
+      <span class="tg-clouds" aria-hidden="true"><i class="c1"></i><i class="c2"></i></span>
+      <span class="tg-stars" aria-hidden="true"><i style="left:16px;top:12px;--d:0"></i><i class="b" style="left:30px;top:30px;--d:1"></i><i style="left:46px;top:15px;--d:2"></i><i style="left:58px;top:36px;--d:3"></i><i class="b" style="left:70px;top:10px;--d:4"></i><i style="left:22px;top:40px;--d:5"></i></span>
+      <span class="tg-knob" aria-hidden="true"><span class="tg-sun"></span><span class="tg-moon"><i></i><i></i><i></i></span></span>
+    </button>
+    <p class="theme-msg"><span id="themeHint">No escuro? Arrasta pro lado e descansa a vista.</span><strong><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.3 3.1 4.5 6.8 4.5c2.1 0 3.5 1.1 5.2 3 1.7-1.9 3.1-3 5.2-3 3.7 0 5.9 3.8 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg>A Laranjoo também pensa no seu bem-estar</strong></p>
+  </div>
 
   <section class="spot" id="spot" aria-roledescription="carrossel" aria-label="Produtos em destaque">
     <div class="spot-label"><span><svg class="i" viewBox="0 0 24 24"><path d="M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-3.5 2-5 1 1.5 2 2 3 2-.5-2.5-.5-4.5 0-7z"/></svg>Em destaque</span><div class="dots" id="dots"></div></div>
@@ -724,10 +785,93 @@ if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
     var x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
     if (!reduce) logoCard.style.transform = "perspective(900px) rotateX(" + (-(y - 0.5) * 6) + "deg) rotateY(" + ((x - 0.5) * 6) + "deg)";
     var t = Math.min(1, Math.max(0, (x - 0.55) / 0.3));
-    setNight(t * t * (3 - 2 * t));
+    t = t * t * (3 - 2 * t);
+    setNight(themeDark ? 1 - t : t);
   });
-  hero.addEventListener("pointerleave", function () { logoCard.style.transform = ""; setNight(0); });
+  hero.addEventListener("pointerleave", function () { logoCard.style.transform = ""; setNight(themeDark ? 1 : 0); });
 }
+
+/* ---- Tema claro/escuro: arrastar a chave (ou tocar) ---- */
+var themeDark = false;
+(function () {
+var root = document.documentElement, tgl = document.getElementById("tgl"), hint = document.getElementById("themeHint");
+var mqDark = window.matchMedia("(prefers-color-scheme: dark)");
+function isDark() { var a = root.getAttribute("data-theme"); return a ? a === "dark" : mqDark.matches; }
+function paint(v, instant) {
+  if (instant) tgl.classList.add("drag");
+  tgl.style.setProperty("--t", v.toFixed(3));
+  if (instant) { void tgl.offsetWidth; tgl.classList.remove("drag"); }
+}
+function syncTheme(d, instant) {
+  themeDark = d;
+  tgl.setAttribute("aria-checked", d ? "true" : "false");
+  hint.style.opacity = "0";
+  setTimeout(function () {
+    hint.textContent = d ? "Modo noite ligado: mais conforto pros seus olhos." : "No escuro? Arrasta pro lado e descansa a vista.";
+    hint.style.opacity = "1";
+  }, instant ? 0 : 200);
+  if (instant || reduce) { night = nightTarget = d ? 1 : 0; logoCard.style.setProperty("--night", String(night)); logoCard.style.setProperty("--dusk", "0"); }
+  else setNight(d ? 1 : 0);
+}
+function knobCenter(v) {
+  var r = tgl.getBoundingClientRect(), K = 40;
+  return [r.left + 5 + K / 2 + v * (r.width - K - 10), r.top + r.height / 2];
+}
+function setTheme(d) {
+  paint(d ? 1 : 0);
+  if (d === isDark()) { syncTheme(d); return; }
+  var c = knobCenter(d ? 1 : 0);
+  var go = function () {
+    root.setAttribute("data-theme", d ? "dark" : "light");
+    try { localStorage.setItem("laranjoo-tema", d ? "dark" : "light"); } catch (e) {}
+    syncTheme(d, true);
+  };
+  if (!reduce && document.startViewTransition) {
+    var vt = document.startViewTransition(go);
+    vt.ready.then(function () {
+      var R = Math.hypot(Math.max(c[0], innerWidth - c[0]), Math.max(c[1], innerHeight - c[1]));
+      root.animate({ clipPath: ["circle(0px at " + c[0] + "px " + c[1] + "px)", "circle(" + R + "px at " + c[0] + "px " + c[1] + "px)"] },
+        { duration: 750, easing: "cubic-bezier(.32,0,.18,1)", pseudoElement: "::view-transition-new(root)" });
+    }).catch(function () {});
+  } else go();
+  try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) {}
+}
+var drag = null;
+tgl.addEventListener("pointerdown", function (e) {
+  if (e.button !== 0) return;
+  var r = tgl.getBoundingClientRect();
+  drag = { x: e.clientX, t0: themeDark ? 1 : 0, t: themeDark ? 1 : 0, range: r.width - 50, moved: false, id: e.pointerId };
+  try { tgl.setPointerCapture(e.pointerId); } catch (err) {}
+});
+tgl.addEventListener("pointermove", function (e) {
+  if (!drag || e.pointerId !== drag.id) return;
+  var dx = e.clientX - drag.x;
+  if (!drag.moved && Math.abs(dx) < 4) return;
+  drag.moved = true;
+  tgl.classList.add("drag");
+  drag.t = Math.min(1, Math.max(0, drag.t0 + dx / drag.range));
+  paint(drag.t);
+});
+function endDrag(e) {
+  if (!drag || e.pointerId !== drag.id) return;
+  var d = drag.moved ? drag.t > 0.5 : drag.t0 < 0.5;
+  tgl.classList.remove("drag");
+  drag = null;
+  setTheme(d);
+}
+tgl.addEventListener("pointerup", endDrag);
+tgl.addEventListener("pointercancel", function (e) { if (drag && e.pointerId === drag.id) { tgl.classList.remove("drag"); paint(drag.t0); drag = null; } });
+tgl.addEventListener("click", function (e) { if (e.detail === 0) setTheme(!themeDark); });   /* teclado: Enter/Espaço */
+tgl.addEventListener("keydown", function (e) {
+  if (e.key === "ArrowRight") { e.preventDefault(); setTheme(true); }
+  else if (e.key === "ArrowLeft") { e.preventDefault(); setTheme(false); }
+});
+mqDark.addEventListener && mqDark.addEventListener("change", function () {
+  if (!root.getAttribute("data-theme")) { paint(isDark() ? 1 : 0); syncTheme(isDark()); }
+});
+paint(isDark() ? 1 : 0, true);
+syncTheme(isDark(), true);
+})();
 mini.addEventListener("click", function (e) {
   e.preventDefault();
   window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
