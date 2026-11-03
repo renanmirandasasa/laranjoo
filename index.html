@@ -342,6 +342,48 @@ input:focus-visible, select:focus-visible, .chip:focus-visible, .btn:focus-visib
   .slide, .slide.on, .strip.anim, .mini, .chip, .dot { transition: none; }
   .dots.run .dot[aria-current="true"]::after { animation: none; }
 }
+/* ---------- Destaque: brilho e detalhes ---------- */
+.spot { position: relative; isolation: isolate; border-color: color-mix(in srgb, var(--brand) 38%, var(--line)); background: radial-gradient(120% 95% at 100% 0%, color-mix(in srgb, var(--brand) 24%, transparent), transparent 58%), radial-gradient(90% 80% at 0% 100%, color-mix(in srgb, #E8487A 14%, transparent), transparent 62%), var(--surface); box-shadow: 0 22px 44px -28px color-mix(in srgb, var(--brand) 85%, transparent); }
+.spot::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background-image: radial-gradient(color-mix(in srgb, var(--brand) 45%, transparent) 1.3px, transparent 1.6px); background-size: 18px 18px; opacity: 0.4; -webkit-mask-image: linear-gradient(115deg, transparent 38%, #000 100%); mask-image: linear-gradient(115deg, transparent 38%, #000 100%); }
+.spot::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; z-index: 1; background: linear-gradient(90deg, #F4381F, #F8811C, #E8487A, #F8811C, #F4381F); background-size: 200% 100%; }
+.spot-spark { position: absolute; z-index: 0; width: 14px; height: 14px; color: var(--brand); pointer-events: none; opacity: 0.85; }
+.spot-spark.s1 { top: 46px; right: 26%; }
+.spot-spark.s2 { bottom: 22px; right: 7%; width: 10px; height: 10px; }
+.spot-spark.s3 { top: 38%; right: 3%; width: 8px; height: 8px; }
+.slide { position: relative; }
+.slide .tile { box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 55%, transparent), 0 20px 40px -16px color-mix(in srgb, var(--brand) 75%, transparent); }
+.spot-ghost { position: absolute; z-index: 0; right: -4px; top: 50%; translate: 0 -52%; font-family: var(--font-display); font-weight: 800; font-size: 8.5rem; line-height: 1; letter-spacing: -0.04em; color: transparent; -webkit-text-stroke: 2px color-mix(in srgb, var(--brand) 30%, transparent); pointer-events: none; user-select: none; font-variant-numeric: tabular-nums; }
+.spot-body { position: relative; }
+.spot-body > :not(.spot-ghost) { position: relative; z-index: 1; }
+.spot .num-inline { background: linear-gradient(135deg, var(--btn-bg), #F4381F); color: #FFFFFF; box-shadow: 0 6px 14px -6px color-mix(in srgb, var(--btn-bg) 90%, transparent); padding: 3px 11px; }
+.spot-sticker { position: absolute; z-index: 2; left: 8px; top: 8px; display: inline-flex; align-items: center; gap: 5px; background: linear-gradient(135deg, #F4381F, #F8811C); color: #FFFFFF; font-weight: 800; font-size: 0.68rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 5px 10px 5px 8px; border-radius: 999px; rotate: -4deg; box-shadow: 0 8px 16px -8px rgba(244, 56, 31, 0.9); }
+.spot-sticker svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.spot-perks { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 2px 0 0; padding: 0; list-style: none; font-size: 0.78rem; color: var(--muted); }
+.spot-perks li { display: inline-flex; align-items: center; gap: 5px; }
+.spot-perks svg { width: 14px; height: 14px; color: var(--brand); fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.spot-body .btn { box-shadow: 0 12px 24px -12px color-mix(in srgb, var(--btn-bg) 95%, transparent); }
+@media (max-width: 639px) { .spot-ghost { font-size: 6rem; top: 0; translate: 0 -8%; right: 0; } }
+@media (prefers-reduced-motion: no-preference) {
+  .spot::after { animation: flow 6s linear infinite; }
+  .spot-spark { animation: twinkle 3.2s ease-in-out infinite; }
+  .spot-spark.s2 { animation-delay: 1.1s; }
+  .spot-spark.s3 { animation-delay: 2s; }
+  .spot-sticker { animation: wobble 4s ease-in-out infinite; }
+}
+@keyframes flow { to { background-position: -200% 0; } }
+@keyframes twinkle { 0%, 100% { transform: scale(0.5) rotate(0); opacity: 0.25; } 50% { transform: scale(1.15) rotate(25deg); opacity: 1; } }
+@keyframes wobble { 0%, 100% { rotate: -4deg; } 50% { rotate: 2deg; } }
+
+/* ---------- Categorias: rolagem com o mouse ---------- */
+.chips { cursor: grab; overscroll-behavior-x: contain; scroll-behavior: auto; --fl: 0px; --fr: 0px; -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--fl), #000 calc(100% - var(--fr)), transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 var(--fl), #000 calc(100% - var(--fr)), transparent 100%); }
+.chips.can-l { --fl: 34px; }
+.chips.can-r { --fr: 34px; }
+.chips.dragging { cursor: grabbing; }
+.chips.dragging .chip { pointer-events: none; }
+.chip { position: relative; }
+.chip:hover:not([aria-pressed="true"]) { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 10%, var(--surface)); }
+.chips-hint { margin: -2px 0 0; font-size: 0.72rem; color: var(--muted); display: none; }
+@media (hover: hover) and (pointer: fine) { .chips-hint.show { display: block; } }
 /* ---------- Kit especial (ex.: Amigo secreto até R$ 40) ---------- */
 .kit { position: relative; margin-top: 16px; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); background: linear-gradient(135deg, color-mix(in srgb, var(--brand) 13%, var(--surface)) 0%, var(--surface) 55%, color-mix(in srgb, #E8487A 11%, var(--surface)) 100%); padding-block: 16px 12px; }
 .kit-head { position: relative; z-index: 1; display: flex; align-items: flex-start; gap: 12px; padding-inline: 16px; }
@@ -462,6 +504,9 @@ input:focus-visible, select:focus-visible, .chip:focus-visible, .btn:focus-visib
 
   <section class="spot" id="spot" aria-roledescription="carrossel" aria-label="Produtos em destaque">
     <div class="spot-label"><span><svg class="i" viewBox="0 0 24 24"><path d="M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-3.5 2-5 1 1.5 2 2 3 2-.5-2.5-.5-4.5 0-7z"/></svg>Em destaque</span><div class="dots" id="dots"></div></div>
+    <svg class="spot-spark s1" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12 7-1 11-5 12-12z"/></svg>
+    <svg class="spot-spark s2" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12 7-1 11-5 12-12z"/></svg>
+    <svg class="spot-spark s3" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12 7-1 11-5 12-12z"/></svg>
     <div class="track" id="track"></div>
   </section>
 
@@ -490,6 +535,7 @@ input:focus-visible, select:focus-visible, .chip:focus-visible, .btn:focus-visib
       </select>
     </div>
     <div class="chips" id="chips" role="group" aria-label="Categorias"></div>
+    <p class="chips-hint" id="chipsHint">Gire a rodinha do mouse sobre as categorias para ver todas →</p>
   </div>
 </div>
 
@@ -970,9 +1016,10 @@ var strip = null;
 function slideHtml(p, i, clone) {
   var c = catById[p.cat];
   return '<article class="slide"' + (clone ? ' aria-hidden="true" data-clone="1"' : ' aria-label="' + (i + 1) + ' de ' + N + '"') + '>' +
-    '<div class="tile' + (p.img ? ' photo' : '') + '">' + visual(p) + '</div>' +
-    '<div class="spot-body"><div class="spot-meta">' + (p.num ? '<span class="num-inline">Nº ' + pad(p.num) + '</span>' : '') + '<span class="cat">' + catIcon(c.id) + esc(c.nome) + '</span></div>' +
-    '<h2 class="spot-name">' + esc(p.nome) + '</h2>' + buy(p) + '</div></article>';
+    '<div class="tile' + (p.img ? ' photo' : '') + '"><span class="spot-sticker"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.4 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>Achado Laranjoo</span>' + visual(p) + '</div>' +
+    '<div class="spot-body">' + (p.num ? '<span class="spot-ghost" aria-hidden="true">' + pad(p.num) + '</span>' : '') + '<div class="spot-meta">' + (p.num ? '<span class="num-inline">Nº ' + pad(p.num) + '</span>' : '') + '<span class="cat">' + catIcon(c.id) + esc(c.nome) + '</span></div>' +
+    '<h2 class="spot-name">' + esc(p.nome) + '</h2>' + buy(p) +
+    '<ul class="spot-perks"><li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Link direto na Shopee</li><li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Preço atualizado na loja</li></ul></div></article>';
 }
 function renderSpot() {
   if (!N) { document.getElementById("spot").hidden = true; return; }
@@ -1162,6 +1209,75 @@ document.getElementById("chips").addEventListener("click", function (e) {
   state.cat = b.getAttribute("data-cat");
   renderChips(); renderGrid();
 });
+/* Barra de categorias: roda do mouse rola para o lado, arrastar também, e passar o mouse revela o nome inteiro */
+(function () {
+  var el = document.getElementById("chips");
+  var hint = document.getElementById("chipsHint");
+  var raf = 0;
+  function edges() {
+    var max = el.scrollWidth - el.clientWidth;
+    el.classList.toggle("can-l", el.scrollLeft > 4);
+    el.classList.toggle("can-r", el.scrollLeft < max - 4);
+    if (hint) hint.classList.toggle("show", max > 4);
+  }
+  function glide(to) {
+    var max = el.scrollWidth - el.clientWidth;
+    to = Math.max(0, Math.min(max, to));
+    if (reduce) { el.scrollLeft = to; return; }
+    cancelAnimationFrame(raf);
+    var from = el.scrollLeft, t0 = performance.now(), dur = 260;
+    (function step(t) {
+      var k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      el.scrollLeft = from + (to - from) * e;
+      if (k < 1) raf = requestAnimationFrame(step);
+    })(t0);
+  }
+  el.addEventListener("scroll", edges, { passive: true });
+  window.addEventListener("resize", edges);
+  new MutationObserver(function () { edges(); }).observe(el, { childList: true });
+  /* roda do mouse: na barra, rola as categorias; nas pontas, deixa a página rolar */
+  el.addEventListener("wheel", function (e) {
+    var max = el.scrollWidth - el.clientWidth;
+    if (max <= 4) return;
+    var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (!d) return;
+    var goingRight = d > 0;
+    if ((goingRight && el.scrollLeft >= max - 1) || (!goingRight && el.scrollLeft <= 0)) return;
+    e.preventDefault();
+    cancelAnimationFrame(raf);
+    el.scrollLeft += d;
+  }, { passive: false });
+  /* passar o mouse num botão cortado traz ele inteiro para a vista */
+  el.addEventListener("pointerover", function (e) {
+    if (e.pointerType !== "mouse") return;
+    var b = e.target.closest(".chip");
+    if (!b || !el.contains(b)) return;
+    var cr = el.getBoundingClientRect(), br = b.getBoundingClientRect(), pad = 44;
+    if (br.right > cr.right - 6) glide(el.scrollLeft + (br.right - cr.right) + pad);
+    else if (br.left < cr.left + 6) glide(el.scrollLeft - (cr.left - br.left) - pad);
+  });
+  /* arrastar com o mouse */
+  var down = false, sx = 0, sl = 0, moved = false;
+  el.addEventListener("pointerdown", function (e) {
+    if (e.pointerType !== "mouse" || e.button !== 0) return;
+    down = true; moved = false; sx = e.clientX; sl = el.scrollLeft;
+  });
+  window.addEventListener("pointermove", function (e) {
+    if (!down) return;
+    var dx = e.clientX - sx;
+    if (!moved && Math.abs(dx) > 5) { moved = true; el.classList.add("dragging"); cancelAnimationFrame(raf); }
+    if (moved) el.scrollLeft = sl - dx;
+  });
+  function up() {
+    if (!down) return;
+    down = false;
+    if (moved) { setTimeout(function () { el.classList.remove("dragging"); }, 0); }
+  }
+  window.addEventListener("pointerup", up);
+  window.addEventListener("pointercancel", up);
+  el.addEventListener("click", function (e) { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+  edges();
+})();
 document.getElementById("q").addEventListener("input", function (e) { state.q = e.target.value; renderGrid(); });
 document.getElementById("sort").addEventListener("change", function (e) { state.sort = e.target.value; renderGrid(); });
 
