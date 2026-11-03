@@ -50,10 +50,24 @@ for p in prods:
         it["img"] = img
     items.append(it)
 
+
+# Kits (config/kits.json): blocos especiais, ex.: "Amigo secreto até R$ 40"
+kits_path = os.path.join(D, "config", "kits.json")
+kits = []
+if os.path.exists(kits_path):
+    nums = {it.get("num") for it in items}
+    for k in (json.load(open(kits_path, encoding="utf-8")).get("lista") or []):
+        its = [{"num": int(i["num"]), "preco": float(i["preco"]) if i.get("preco") is not None else None}
+               for i in (k.get("itens") or []) if int(i.get("num", 0)) in nums]
+        if its:
+            kits.append({"id": k.get("id") or "kit", "titulo": k.get("titulo") or "", "sub": k.get("sub") or "",
+                         "precoData": k.get("precoData") or "", "itens": its})
+
 data = ("/* Gerado a partir do Painel do Catálogo. Para mudar produtos, edite no painel e peça ao Claude para publicar. */\n"
         "var CATEGORIES = " + js(cats) + ";\n"
         "var PRODUCTS = " + js(items) + ";\n"
-        "var SOCIAL = " + js({"tiktok": (cfg.get("tiktok") or "").strip(), "instagram": (cfg.get("instagram") or "").strip()}) + ";\n\n")
+        "var SOCIAL = " + js({"tiktok": (cfg.get("tiktok") or "").strip(), "instagram": (cfg.get("instagram") or "").strip()}) + ";\n"
+        "var KITS = " + js(kits) + ";\n\n")
 
 s = open(TEMPLATE, encoding="utf-8").read()
 s, n = re.subn(r"/\* ============ CONFIGURAÇÃO.*?(?=var GLYPHS)", lambda m: data, s, count=1, flags=re.S)
@@ -75,6 +89,7 @@ s = s.replace("__UPDATED__", (datetime.datetime.now(datetime.timezone.utc) - dat
 assert "__" not in re.sub(r"__[a-z]+__", "", s.replace("__LOGO__", "").replace("__TILE__", "").replace("__UPDATED__", "")) or True
 
 open(OUT, "w", encoding="utf-8").write(s)
+print("kits:", [(k["titulo"], len(k["itens"])) for k in kits])
 print("produtos:", len(items), "| com foto:", sum(1 for i in items if "img" in i),
       "| destaques:", sum(1 for i in items if i["destaque"]), "| categorias:", [c["nome"] for c in cats])
 print("ignorados (sem nome ou link válido):", skipped)
